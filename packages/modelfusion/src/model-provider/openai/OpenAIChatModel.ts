@@ -26,6 +26,7 @@ import { countOpenAIChatPromptTokens } from "./countOpenAIChatMessageTokens";
 // Open AI base chat models and their context window sizes.
 export const CHAT_MODEL_CONTEXT_WINDOW_SIZES = {
   "gpt-4": 8192,
+  "gpt-4o": 128000,
   "gpt-4-0314": 8192,
   "gpt-4-0613": 8192,
   "gpt-4-turbo-preview": 128000,
@@ -66,11 +67,11 @@ export function getOpenAIChatModelInformation(model: OpenAIChatModelType): {
   const [_, baseModel, ___, ____, _____] = model.split(":");
 
   if (
-    ["gpt-3.5-turbo", "gpt-3.5-turbo-0613", "gpt-4-0613"].includes(baseModel)
+    ["gpt-3.5-turbo", "gpt-4o", "gpt-3.5-turbo-0613", "gpt-4-0613"].includes(baseModel)
   ) {
     const contextWindowSize =
       CHAT_MODEL_CONTEXT_WINDOW_SIZES[
-        baseModel as FineTuneableOpenAIChatModelType
+      baseModel as FineTuneableOpenAIChatModelType
       ];
 
     return {
@@ -85,6 +86,7 @@ export function getOpenAIChatModelInformation(model: OpenAIChatModelType): {
 
 type FineTuneableOpenAIChatModelType =
   | `gpt-3.5-turbo`
+  | `gpt-4o`
   | `gpt-3.5-turbo-0613`
   | `gpt-4-0613`;
 
@@ -123,9 +125,9 @@ export interface OpenAIChatSettings extends AbstractOpenAIChatSettings {
 export class OpenAIChatModel
   extends AbstractOpenAIChatModel<OpenAIChatSettings>
   implements
-    TextStreamingBaseModel<OpenAIChatPrompt, OpenAIChatSettings>,
-    ToolCallGenerationModel<OpenAIChatPrompt, OpenAIChatSettings>,
-    ToolCallsGenerationModel<OpenAIChatPrompt, OpenAIChatSettings>
+  TextStreamingBaseModel<OpenAIChatPrompt, OpenAIChatSettings>,
+  ToolCallGenerationModel<OpenAIChatPrompt, OpenAIChatSettings>,
+  ToolCallsGenerationModel<OpenAIChatPrompt, OpenAIChatSettings>
 {
   constructor(settings: OpenAIChatSettings) {
     super(settings);
@@ -201,13 +203,13 @@ export class OpenAIChatModel
   ) {
     return "adaptModel" in promptTemplate
       ? new ObjectFromTextStreamingModel({
-          model: promptTemplate.adaptModel(this),
-          template: promptTemplate,
-        })
+        model: promptTemplate.adaptModel(this),
+        template: promptTemplate,
+      })
       : new ObjectFromTextStreamingModel({
-          model: this as TextStreamingModel<OpenAIChatPrompt>,
-          template: promptTemplate,
-        });
+        model: this as TextStreamingModel<OpenAIChatPrompt>,
+        template: promptTemplate,
+      });
   }
 
   withTextPrompt() {
